@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, UniqueConstraint
+from sqlalchemy import Column, Integer, Float, String, Boolean, UniqueConstraint
 from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.sql.sqltypes import Float
+from sqlalchemy.orm import validates
+from slugify import slugify
 
 from .database import Base
 
@@ -10,10 +11,17 @@ class Book(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     author = Column(String, nullable=False)
-    title = Column(String, nullable=False)
+    title = Column(String, nullable=False, index=True)
     rating = Column(Float, nullable=False)
     description = Column(String)
     content_url = Column(String, nullable=False)
+    slug = Column(String, unique=True, index=True)
+
+    @validates("title")
+    def generate_slug(self, key, title):
+        raw_slug = slugify(title)
+        self.slug = f"{raw_slug}-{self.id}" if self.id else raw_slug
+        return title
 
 
 class User(Base):
