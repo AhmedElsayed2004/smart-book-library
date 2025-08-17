@@ -13,12 +13,6 @@ class AskAIRequest(BaseModel):
     question: str
 
 
-class BookRequest(BaseModel):
-    author: str = Field(min_length=1)
-    title: str = Field(min_length=1)
-    rating: float = Field(gt=0, lt=5)
-    description: str | None
-    content_url: str
 
 
 router = APIRouter(
@@ -69,8 +63,3 @@ async def ask_about_book(db: db_dependency, ask_ai_request: AskAIRequest, book_i
     return {"answer": answer}
 
 
-@router.post("")
-async def create_book(db: db_dependency, book: BookRequest):
-    record = Book(**book.model_dump())
-    db.add(record)
-    db.commit()
