@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.sql.sqltypes import Float
 
-from database import Base
+from .database import Base
 
 
 class Book(Base):

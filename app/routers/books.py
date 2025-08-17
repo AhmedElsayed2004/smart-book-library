@@ -1,9 +1,9 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, Query, Path, HTTPException, status
+from fastapi import APIRouter, Depends, Path, HTTPException, status
 from sqlalchemy.orm import Session
 
-from database import Base, engine, SessionLocal
-from models import Book
+from ..database import Base, engine, SessionLocal
+from ..models import Book
 
 router = APIRouter(
     prefix="/books",
