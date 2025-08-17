@@ -1,0 +1,63 @@
+from typing import Annotated
+from fastapi import APIRouter, Depends, Path, HTTPException, status
+from sqlalchemy.orm import Session
+from pydantic import BaseModel, Field
+
+from ..database import Base, engine, SessionLocal
+from ..models import Book
+
+from ..services import ai_service
+
+
+class BookRequest(BaseModel):
+    author: str = Field(min_length=1)
+    title: str = Field(min_length=1)
+    rating: float = Field(gt=0, lt=5)
+    description: str | None
+    content_url: str
+
+
+router = APIRouter(
+    prefix="/admin",
+    tags=["admin"]
+)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+db_dependency = Annotated[Session, Depends(get_db)]
+
+
+@router.post("/books")
+async def create_book(db: db_dependency, book_request: BookRequest):
+    record = Book(**book_request.model_dump())
+    db.add(record)
+    db.commit()
+
+
+@router.put("/books/{book_id}")
+async def update_book(db: db_dependency, book_id: int, book_request: BookRequest):
+    record = db.query(Book).filter(Book.id == book_id).first()
+    if record is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    record.author = book_request.author
+    record.title = book_request.title
+    record.rating = book_request.rating
+    record.description = book_request.description
+    record.content_url = book_request.content_url
+    db.commit()
+
+
+@router.delete("/books/{book_id}")
+async def delete_book(db: db_dependency, book_id: int):
+    record = db.query(Book).filter(Book.id == book_id).first()
+    if record is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    db.delete(record)
+    db.commit()

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, String, Boolean, UniqueConstraint
+from sqlalchemy import Column, Integer, Float, String, Boolean, UniqueConstraint, event
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.orm import validates
 from slugify import slugify
@@ -17,11 +17,16 @@ class Book(Base):
     content_url = Column(String, nullable=False)
     slug = Column(String, unique=True, index=True)
 
-    @validates("title")
-    def generate_slug(self, key, title):
-        raw_slug = slugify(title)
-        self.slug = f"{raw_slug}-{self.id}" if self.id else raw_slug
-        return title
+
+@event.listens_for(Book, "after_insert")
+def set_slug_after_insert(mapper, connection, target):
+    raw_slug = slugify(target.title)
+    new_slug = f"{raw_slug}-{target.id}"
+    connection.execute(
+        Book.__table__.update()
+        .where(Book.id == target.id)
+        .values(slug=new_slug)
+    )
 
 
 class User(Base):
