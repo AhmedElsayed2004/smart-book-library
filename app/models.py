@@ -1,9 +1,15 @@
-from sqlalchemy import Column, Integer, Float, String, Boolean, UniqueConstraint, event
+from enum import Enum
+
+from sqlalchemy import Column, Integer, Float, String, Boolean, UniqueConstraint, event, Enum as SAEnum
 from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.orm import validates
 from slugify import slugify
 
 from .database import Base
+
+
+class UserRole(Enum):
+    USER = "user"
+    ADMIN = "admin"
 
 
 class Book(Base):
@@ -36,7 +42,7 @@ class User(Base):
     username = Column(String, nullable=False, unique=True)
     email = Column(String, nullable=False, unique=True)
     password_hash = Column(String, nullable=False)
-    is_admin = Column(Boolean, nullable=False, default=False)
+    role = Column(SAEnum(UserRole), nullable=False, default=UserRole.USER)
 
 
 class UserLibrary(Base):
