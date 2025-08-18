@@ -1,12 +1,12 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, Path, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
+from starlette import status
 
-from ..database import Base, engine, SessionLocal
-from ..models import Book
-
-from ..services import ai_service
+from ..database import SessionLocal
+from ..models import Book, UserRole
+from .auth import get_current_user
 
 
 class BookRequest(BaseModel):
@@ -32,17 +32,27 @@ def get_db():
 
 
 db_dependency = Annotated[Session, Depends(get_db)]
+user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
 @router.post("/books")
-async def create_book(db: db_dependency, book_request: BookRequest):
+async def create_book(user: user_dependency, db: db_dependency, book_request: BookRequest):
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication Failed")
+    if not user.get('role') == str(UserRole.ADMIN):
+        raise HTTPException(status_code=401, detail="Authentication Failed")
     record = Book(**book_request.model_dump())
     db.add(record)
     db.commit()
 
 
 @router.put("/books/{book_id}")
-async def update_book(db: db_dependency, book_id: int, book_request: BookRequest):
+async def update_book(user: user_dependency, db: db_dependency, book_id: int, book_request: BookRequest):
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication Failed")
+    if not user.get('role') == str(UserRole.ADMIN):
+        raise HTTPException(status_code=401, detail="Authentication Failed")
+
     record = db.query(Book).filter(Book.id == book_id).first()
     if record is None:
         raise HTTPException(status_code=404, detail="Book not found")
@@ -55,7 +65,12 @@ async def update_book(db: db_dependency, book_id: int, book_request: BookRequest
 
 
 @router.delete("/books/{book_id}")
-async def delete_book(db: db_dependency, book_id: int):
+async def delete_book(user: user_dependency, db: db_dependency, book_id: int):
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication Failed")
+    if not user.get('role') == str(UserRole.ADMIN):
+        raise HTTPException(status_code=401, detail="Authentication Failed")
+
     record = db.query(Book).filter(Book.id == book_id).first()
     if record is None:
         raise HTTPException(status_code=404, detail="Book not found")
