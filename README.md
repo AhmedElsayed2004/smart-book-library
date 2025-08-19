@@ -17,13 +17,7 @@ Smart Book Library is a web application built with **FastAPI** that allows users
 - **Authentication:** JWT-based with role-based access control  
 - **Testing:** Unit and integration tests with Pytest  
 
-## Getting Started
-
-### Prerequisites
-- Python 3.10+  
-- Redis (for background tasks)  
-
-### Installation
+## Installation
 ```bash
 git clone https://github.com/your-username/smart-book-library.git
 cd smart-book-library
