@@ -1,10 +1,10 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, Path, HTTPException, status
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from .auth import get_current_user
-from ..database import Base, engine, SessionLocal
+from ..database import SessionLocal
 from ..models import Book
 
 from ..services import ai_service

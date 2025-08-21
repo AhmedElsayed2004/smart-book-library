@@ -7,9 +7,9 @@ from slugify import slugify
 from .database import Base
 
 
-class UserRole(Enum):
-    USER = "user"
-    ADMIN = "admin"
+# class UserRole(Enum):
+#     USER = "user"
+#     ADMIN = "admin"
 
 
 class Book(Base):
@@ -42,7 +42,7 @@ class User(Base):
     username = Column(String, nullable=False, unique=True)
     email = Column(String, nullable=False, unique=True)
     password_hash = Column(String, nullable=False)
-    role = Column(SAEnum(UserRole), nullable=False, default=UserRole.USER)
+    role = Column(String, nullable=False, default='user')
 
 
 class UserLibrary(Base):
