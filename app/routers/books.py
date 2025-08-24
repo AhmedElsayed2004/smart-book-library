@@ -10,8 +10,6 @@ from ..models import Book
 from ..services import ai_service
 
 
-class AskAIRequest(BaseModel):
-    question: str
 
 
 
@@ -53,17 +51,5 @@ async def search_by_title(db: db_dependency, title: str):
     if record is None:
         raise HTTPException(status_code=404, detail="Book not found")
     return record
-
-
-@router.post("/{book_id}/ask")
-async def ask_about_book(user: user_dependency,db: db_dependency, ask_ai_request: AskAIRequest, book_id: int = Path(gt=0)):
-    if user is None:
-        raise HTTPException(status_code=401, detail="Authentication Failed")
-    record: Book | None = db.query(Book).filter(Book.id == book_id).first()
-    if record is None:
-        raise HTTPException(status_code=404, detail="Book not found")
-    question = ask_ai_request.question
-    answer = ai_service.answer_about_book(question, record.slug)
-    return {"answer": answer}
 
 

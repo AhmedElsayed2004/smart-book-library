@@ -52,12 +52,7 @@ async def create_book(user: user_dependency, db: db_dependency, book_request: Bo
     #long task
     # ai_tasks.embed_book_task.delay(record.content_url, record.slug)
 
-    try:
-        result = ai_tasks.embed_book_task.delay(record.content_url, record.slug)
-        print(f"Task queued successfully with ID: {result.id}")
-        print(f"Task status: {result.status}")
-    except Exception as e:
-        print(f"Error queuing task: {e}")
+    ai_tasks.embed_book_task.delay(record.content_url, record.slug)
 
     return {"message": "Adding book"}
 
